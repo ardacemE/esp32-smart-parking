@@ -1,25 +1,64 @@
-# Credentials and sensitive files
+# ============================================
+# CREDENTIALS AND SENSITIVE FILES
+# ============================================
 credentials.h
 secrets.h
 config_private.h
+.env
+.env.local
 
-# Arduino build files
+# ============================================
+# ARDUINO BUILD FILES
+# ============================================
 *.hex
 *.elf
 *.bin
 *.map
 
-# IDE files
+# ============================================
+# MOBILE APP - NODE MODULES & DEPENDENCIES
+# ============================================
+mobile-app/node_modules/
+mobile-app/.expo/
+mobile-app/.expo-shared/
+mobile-app/dist/
+mobile-app/npm-debug.*
+mobile-app/yarn-error.log
+mobile-app/yarn.lock
+mobile-app/package-lock.json
+
+# ============================================
+# MOBILE APP - BUILD & CACHE
+# ============================================
+mobile-app/android/
+mobile-app/ios/
+mobile-app/.expo/
+mobile-app/web-build/
+mobile-app/*.jks
+mobile-app/*.p8
+mobile-app/*.p12
+mobile-app/*.key
+mobile-app/*.mobileprovision
+
+# ============================================
+# IDE FILES
+# ============================================
 .vscode/
 .idea/
 *.code-workspace
+*.swp
+*.swo
 
-# OS files
+# ============================================
+# OS FILES
+# ============================================
 .DS_Store
 Thumbs.db
 desktop.ini
+*.tmp
 
-# Backup files
+# ============================================
+# BACKUP FILES
+# ============================================
 *.bak
 *~
-*.swp

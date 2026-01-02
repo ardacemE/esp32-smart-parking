@@ -1,74 +1,155 @@
-# Smart Parking System - ESP32 Firebase
+# 🚗 ESP32 Smart Parking System
 
-A comprehensive smart parking management system using ESP32, Firebase Realtime Database, ultrasonic sensors, servo motors, and dual LCD displays.
+A comprehensive IoT smart parking management system with hardware control and mobile application.
 
-## 🚗 Features
+## 📋 Project Overview
 
-- **6 Parking Slots** with real-time occupancy detection
-- **Dual LCD Display System**:
-  - Entrance LCD: Shows available spots and reserved slots
-  - Exit LCD: Displays payment status
-- **Automated Gate Control** with servo motors
-- **Firebase Integration** for remote monitoring and payment
-- **Reservation System** via Firebase
-- **Automatic Fee Calculation** based on parking duration
-- **LED Indicators** for each parking slot
-- **Buzzer Alerts** for full parking lot
+This project consists of two main components:
+1. **Hardware System** - ESP32-based parking lot controller
+2. **Mobile App** - React Native application for users
 
-## 🛠️ Hardware Requirements
+## 🏗️ System Architecture
 
-- ESP32 Development Board
-- 8x HC-SR04 Ultrasonic Sensors (6 for slots, 2 for gates)
-- 2x 16x2 I2C LCD Displays (0x27 and 0x26)
-- 2x Servo Motors (Entry and Exit gates)
-- 6x LEDs (Slot indicators)
-- 1x Buzzer
-- Jumper wires and breadboard
-
-## 📋 Pin Configuration
-
-| Component | Pin |
-|-----------|-----|
-| Trigger Pin | GPIO 25 |
-| Servo In | GPIO 18 |
-| Servo Out | GPIO 19 |
-| Buzzer | GPIO 26 |
-| LEDs | GPIO 2, 4, 5, 12, 15, 23 |
-| Echo Pins | GPIO 13, 14, 16, 17, 32, 33, 34, 35 |
-
-## 🔧 Setup Instructions
-
-### 1. Install Required Libraries
-Install these libraries via Arduino IDE Library Manager:
-- `ESP32Servo`
-- `LiquidCrystal_I2C`
-- `FirebaseClient`
-- `WiFiClientSecure`
-
-### 2. Configure Credentials
-Open `new-fb-client.ino` and replace the placeholders:
-
-```cpp
-#define WIFI_SSID "Your_WiFi_SSID"
-#define WIFI_PASSWORD "Your_WiFi_Password"
-#define Web_API_KEY "Your_API_Key"
-#define DATABASE_URL "Your_Database_URL"
-#define USER_EMAIL "Your_Email"
-#define USER_PASS "Your_Password"
+```
+┌─────────────────┐         ┌──────────────────┐         ┌─────────────────┐
+│   ESP32 + Sensors│  ◄────► │  Firebase RTDB   │  ◄────► │  Mobile App     │
+│   (Hardware)     │         │  (Cloud Database)│         │  (React Native) │
+└─────────────────┘         └──────────────────┘         └─────────────────┘
 ```
 
-### 3. Firebase Setup
-1. Create a Firebase project at [firebase.google.com](https://firebase.google.com)
-2. Enable Realtime Database
-3. Set up Email/Password authentication
-4. Get your Web API Key and Database URL
+## 📁 Repository Structure
 
-### 4. Upload to ESP32
-1. Select your ESP32 board in Arduino IDE
-2. Choose the correct COM port
-3. Upload the sketch
+```
+esp32-smart-parking/
+├── hardware/              # ESP32 Arduino code
+│   └── new-fb-client.ino
+├── mobile-app/           # React Native mobile application
+│   ├── app/             # Screens and navigation
+│   ├── components/      # Reusable UI components
+│   ├── firebase/        # Firebase configuration
+│   ├── hooks/           # Custom React hooks
+│   └── constants/       # Theme and constants
+├── README.md            # This file
+└── .gitignore
+```
 
-## 📊 Firebase Database Structure
+---
+
+## 🔧 Hardware System
+
+### Features
+- **6 Parking Slots** with ultrasonic sensors
+- **Dual LCD Displays** (entrance & exit)
+- **Automated Gates** with servo motors
+- **LED Indicators** for each slot
+- **Firebase Integration** for real-time sync
+- **Offline Mode** support
+
+### Hardware Requirements
+- ESP32 Development Board
+- 8× HC-SR04 Ultrasonic Sensors
+- 2× 16x2 I2C LCD Displays (0x27, 0x26)
+- 2× Servo Motors
+- 6× LEDs
+- 1× Buzzer
+- Jumper wires and breadboard
+
+### Pin Configuration
+
+| Component   | Pin                                 |
+| ----------- | ----------------------------------- |
+| Trigger Pin | GPIO 25                             |
+| Servo In    | GPIO 18                             |
+| Servo Out   | GPIO 19                             |
+| Buzzer      | GPIO 26                             |
+| LEDs        | GPIO 2, 4, 5, 12, 15, 23            |
+| Echo Pins   | GPIO 13, 14, 16, 17, 32, 33, 34, 35 |
+
+### Setup Instructions
+
+1. **Install Arduino IDE** and ESP32 board support
+2. **Install Required Libraries**:
+   - `ESP32Servo`
+   - `LiquidCrystal_I2C`
+   - `FirebaseClient`
+   - `WiFiClientSecure`
+
+3. **Configure Credentials** in `hardware/new-fb-client.ino`:
+   ```cpp
+   #define WIFI_SSID "Your_WiFi_SSID"
+   #define WIFI_PASSWORD "Your_WiFi_Password"
+   #define Web_API_KEY "Your_API_Key"
+   #define DATABASE_URL "Your_Database_URL"
+   #define USER_EMAIL "Your_Email"
+   #define USER_PASS "Your_Password"
+   ```
+
+4. **Upload** to ESP32
+
+📖 **[Full Hardware Documentation →](hardware/)**
+
+---
+
+## 📱 Mobile Application
+
+### Features
+- **Real-time Slot Monitoring**
+- **Parking Slot Reservation**
+- **Payment Processing**
+- **Dark/Light Theme**
+- **Turkish Language Support**
+
+### Tech Stack
+- React Native with Expo
+- TypeScript
+- Firebase Realtime Database
+- Expo Router
+- Context API
+
+### Setup Instructions
+
+1. **Navigate to mobile app directory**:
+   ```bash
+   cd mobile-app
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Configure Firebase** in `mobile-app/firebase/firebaseConfig.js`:
+   ```javascript
+   const firebaseConfig = {
+     apiKey: "Your_API_Key",
+     authDomain: "Your_Auth_Domain",
+     databaseURL: "Your_Database_URL",
+     projectId: "Your_Project_ID",
+     storageBucket: "Your_Storage_Bucket",
+     messagingSenderId: "Your_Messaging_Sender_ID",
+     appId: "Your_App_ID",
+     measurementId: "Your_Measurement_ID",
+   };
+   ```
+
+4. **Run the app**:
+   ```bash
+   npm start
+   ```
+
+📖 **[Full Mobile App Documentation →](mobile-app/README.md)**
+
+---
+
+## 🔥 Firebase Setup
+
+### 1. Create Firebase Project
+1. Go to [Firebase Console](https://console.firebase.google.com/)
+2. Create a new project
+3. Enable **Realtime Database**
+4. Enable **Email/Password Authentication**
+
+### 2. Database Structure
 
 ```json
 {
@@ -81,41 +162,137 @@ Open `new-fb-client.ino` and replace the placeholders:
       "exitTime": 0,
       "fee": 0
     },
-    // ... slot2 through slot6
+    "slot2": { ... },
+    "slot3": { ... },
+    "slot4": { ... },
+    "slot5": { ... },
+    "slot6": { ... }
   }
 }
 ```
 
-## 💰 Pricing
+### 3. Security Rules
 
-- Slots 1-4: 50 TL/hour
-- Slots 5-6: 20 TL/hour
-- Minimum charge: 0.05 hours
+```json
+{
+  "rules": {
+    "parking": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}
+```
+
+---
+
+## 💰 Pricing System
+
+| Slot Type  | Slots | Price      |
+| ---------- | ----- | ---------- |
+| Standard   | 1-4   | 50 TL/hour |
+| Accessible | 5-6   | 20 TL/hour |
+
+*Minimum charge: 0.05 hours (3 minutes)*
+
+---
 
 ## 🎯 How It Works
 
-1. **Entry**: Vehicle detected → Gate opens → Welcome message displayed
-2. **Parking**: Ultrasonic sensors detect occupancy → Firebase updated → LED indicators activated
-3. **Exit**: Vehicle leaves slot → Fee calculated → Payment required via Firebase
-4. **Payment**: User pays online → Gate opens → Goodbye message displayed
+### Entry Process
+1. Vehicle approaches entrance
+2. Ultrasonic sensor detects vehicle
+3. LCD shows "Welcome" message
+4. Gate opens automatically
+5. Driver parks in available/reserved slot
 
-## 📱 Online/Offline Mode
+### Parking
+1. Slot sensor detects vehicle
+2. Status updates in Firebase
+3. LED turns on
+4. Entry time recorded
+5. Mobile app shows slot as occupied
 
-- **Online**: Full Firebase integration with remote monitoring and payment
-- **Offline**: Local operation with automatic payment bypass for testing
+### Exit Process
+1. Driver leaves parking slot
+2. System calculates parking fee
+3. Fee appears in mobile app
+4. User pays through app
+5. Exit gate opens automatically
+6. LCD shows "Goodbye" message
 
-## 🔒 Security Note
+---
 
-**Never commit your actual credentials to GitHub!** Always use placeholder values like shown in this repository.
+## 🔒 Security Best Practices
+
+⚠️ **IMPORTANT**: Never commit real credentials to GitHub!
+
+- Use placeholder values in repository
+- Store actual credentials locally
+- Add sensitive files to `.gitignore`
+- Use environment variables in production
+
+---
+
+## 🛠️ Development
+
+### Adding New Features
+
+**Hardware Side**:
+1. Modify `hardware/new-fb-client.ino`
+2. Test with Arduino Serial Monitor
+3. Upload to ESP32
+
+**Mobile Side**:
+1. Create/modify components in `mobile-app/`
+2. Test with Expo Go app
+3. Build for production
+
+---
+
+## 📸 Screenshots
+
+*Add screenshots of your mobile app and hardware setup here*
+
+---
+
+## 🤝 Contributing
+
+This is an educational project. Feel free to:
+- Fork the repository
+- Submit pull requests
+- Report issues
+- Suggest improvements
+
+---
 
 ## 📝 License
 
 This project is open source and available for educational purposes.
 
+---
+
 ## 👨‍💻 Author
 
-Created for smart parking management systems.
+Created as a smart parking management system project.
 
 ---
 
-**⚠️ Important**: Remember to replace all placeholder credentials with your actual values before deploying!
+## 🙏 Acknowledgments
+
+- Firebase for real-time database
+- Expo for React Native development
+- ESP32 community for hardware support
+
+---
+
+## 📞 Support
+
+For questions or issues:
+1. Check the documentation in each folder
+2. Open an issue on GitHub
+3. Review Firebase and ESP32 documentation
+
+---
+
+**⭐ If you find this project helpful, please give it a star!**
