@@ -6,7 +6,7 @@
 #include <WiFiClientSecure.h>
 #include <time.h>
 
-// ================= FIREBASE AYARLARI =================
+
 #define ENABLE_USER_AUTH
 #define ENABLE_DATABASE
 #include <FirebaseClient.h>
@@ -20,25 +20,25 @@
 #define USER_EMAIL "Your_Email"
 #define USER_PASS "Your_Password"
 
-// ================= LCD AYARLARI (ÇİFT EKRAN) =================
-// Giriş Ekranı (0x27)
+
+ 
 LiquidCrystal_I2C lcdIn(0x27, 16, 2);
-// Çıkış Ekranı (0x26 - Eğer çalışmazsa 0x25 veya 0x3F dene)
+ 
 LiquidCrystal_I2C lcdOut(0x26, 16, 2);
 
-// ================= PIN TANIMLARI =================
+
 const int TRIG_PIN = 25;
 const int ECHO_PINS[8] = {
-    13, 14, 16, 17, 32, 33, // Slot 1-6
-    34,                     // Giriş Sensörü
-    35                      // Çıkış Sensörü
+    13, 14, 16, 17, 32, 33, 
+    34,                     
+    35                      
 };
 const int LED_PINS[6] = {2, 4, 5, 12, 15, 23};
 const int SERVO_IN_PIN = 18;
 const int SERVO_OUT_PIN = 19;
 const int BUZZER_PIN = 26;
 
-// ================= MESAFE & HESAPLAMA AYARLARI =================
+
 const long OCCUPIED_MIN_CM = 2;       
 const long OCCUPIED_ON_MAX_CM = 9;    
 const long OCCUPIED_OFF_MIN_CM = 14;  
@@ -47,20 +47,20 @@ const long CAR_DETECT_MIN_CM = 2;
 const long CAR_DETECT_MAX_CM = 10;
 const float RATE_PER_HOUR[6] = {50, 50, 50, 50, 20, 20};
 
-// SERVO AÇILARI
+
 const int IN_OPEN_ANGLE   = 90;
 const int IN_CLOSE_ANGLE  = 180;
 const int OUT_OPEN_ANGLE  = 0;
 const int OUT_CLOSE_ANGLE = 70;
 
-// ZAMANLAMALAR
+
 const unsigned long GATE_OPEN_TIME = 3000;
 const unsigned long GATE_EXIT_TIME = 5000; 
 
 Servo servoIn;
 Servo servoOut;
 
-// SLOT & DURUM DEĞİŞKENLERİ
+
 bool slotOccupied[6] = {false};
 bool slotReserved[6] = {false};
 bool slotPaid[6]     = {false}; 
@@ -68,25 +68,24 @@ unsigned long slotEnterTime[6] = {0};
 unsigned long slotDebounceTime[6] = {0};
 const unsigned long DEBOUNCE_DELAY = 300;
 
-// KAPILAR
+
 unsigned long servoInTimer = 0;             
 bool isServoInOpen = false;                 
 unsigned long servoOutTimer = 0;            
 bool isServoOutOpen = false;                
 
-// EKRAN STATE YÖNETİMİ
-// --- Giriş Ekranı ---
+
 bool inWelcomeMode = false;
 unsigned long inWelcomeTimer = 0;
 unsigned long lcdInCycleTimer = 0;
 bool lcdInShowReservedPage = false;
 
-// --- Çıkış Ekranı ---
-int pendingExitSlot = -1; // Çıkış yapıp ödeme bekleyen slot
+
+int pendingExitSlot = -1; 
 bool outGoodbyeMode = false;
 unsigned long outGoodbyeTimer = 0;
 
-// SİSTEM
+
 unsigned long ledBlinkTimer = 0;
 bool ledBlinkState = false;
 unsigned long lastPollTime = 0;
@@ -96,7 +95,7 @@ const char *ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 3600 * 3; 
 const int daylightOffset_sec = 0;
 
-// ================= FIREBASE NESNELERİ =================
+
 UserAuth user_auth(Web_API_KEY, USER_EMAIL, USER_PASS);
 FirebaseApp app;
 WiFiClientSecure ssl_client;
@@ -104,7 +103,7 @@ using AsyncClient = AsyncClientClass;
 AsyncClient aClient(ssl_client);
 RealtimeDatabase Database;
 
-// ================= YARDIMCI FONKSİYONLAR =================
+
 unsigned long getUnixTime() {
   if (!isOnline) return millis() / 1000;
   time_t now;
@@ -114,7 +113,7 @@ unsigned long getUnixTime() {
   return now;
 }
 
-// MESAFE ÖLÇÜMÜ (Filtreli)
+
 long measureDistanceCM(int echoPin) {
   digitalWrite(TRIG_PIN, LOW);
   delayMicroseconds(2);
@@ -137,7 +136,7 @@ long measureDistanceFiltered(int echoPin) {
   return (count == 0) ? 9999 : sum / count;
 }
 
-// ================= FIREBASE CALLBACKS =================
+
 void processData(AsyncResult &aResult) {
   if (aResult.isError()) return;
   if (!aResult.available()) return;
@@ -155,11 +154,11 @@ void processData(AsyncResult &aResult) {
   for (int i = 0; i < 6; i++) {
     String slotKey = "slot" + String(i + 1);
     
-    // Rezervasyon
+    
     json.get(d, slotKey + "/isReserved");
     if (d.success) slotReserved[i] = d.to<bool>();
 
-    // Ödeme
+   
     json.get(d, slotKey + "/isPayment");
     if (d.success) slotPaid[i] = d.to<bool>();
   }
@@ -206,26 +205,26 @@ void pollAllSlots() {
   Database.get(aClient, "/parking", processData, false, "poll_all");
 }
 
-// ================= EKRAN YÖNETİMİ (ÇİFT EKRAN) =================
 
-// 1. GİRİŞ EKRANI (lcdIn)
+
+
 void updateEntranceLCD(int freeCount) {
   unsigned long now = millis();
 
-  // Eğer Hoşgeldiniz modu açıksa ve süresi dolduysa kapat
+ 
   if (inWelcomeMode && (now - inWelcomeTimer > 3000)) {
     inWelcomeMode = false;
     lcdIn.clear();
   }
 
-  // Hoşgeldiniz modundaysak hiçbir şey yapma (Loop'ta yazıldı zaten)
+  
   if (inWelcomeMode) return;
 
-  // --- IDLE MOD (Döngülü Ekran) ---
+  
   if (now - lcdInCycleTimer > 3000) {
     lcdInCycleTimer = now;
     
-    // Rezerve var mı kontrol et
+    
     bool anyReserved = false;
     for(int i=0; i<6; i++) if(slotReserved[i]) anyReserved = true;
     
@@ -236,7 +235,7 @@ void updateEntranceLCD(int freeCount) {
   }
 
   if (!lcdInShowReservedPage) {
-    // Ana Sayfa: Durum ve Boş Yer
+    
     lcdIn.setCursor(0, 0);
     lcdIn.print(isOnline ? "KULTUR OTOPARK  " : "Sistem: Offline ");
     lcdIn.setCursor(0, 1);
@@ -245,7 +244,7 @@ void updateEntranceLCD(int freeCount) {
       lcdIn.print("Bos Yer: "); lcdIn.print(freeCount); lcdIn.print("      ");
     }
   } else {
-    // Rezerve Sayfası
+    
     String resStr = "";
     for (int i = 0; i < 6; i++) {
       if (slotReserved[i]) resStr += String(i + 1) + " ";
@@ -257,20 +256,20 @@ void updateEntranceLCD(int freeCount) {
   }
 }
 
-// 2. ÇIKIŞ EKRANI (lcdOut)
+
 void updateExitLCD() {
   unsigned long now = millis();
 
-  // Eğer Güle Güle modu açıksa ve süresi dolduysa kapat
+  
   if (outGoodbyeMode) {
     if (now - outGoodbyeTimer > 3000) {
       outGoodbyeMode = false;
       lcdOut.clear();
     }
-    return; // Mod aktifken başka bir şey yazdırma
+    return; 
   }
 
-  // Eğer ödeme bekleyen bir slot varsa onu göster
+  
   if (pendingExitSlot != -1) {
     static unsigned long lastUpdate = 0;
     if (now - lastUpdate > 1000) {
@@ -281,21 +280,21 @@ void updateExitLCD() {
       lcdOut.print("BEKLENIYOR...   ");
     }
   } else {
-    // Kimse yoksa boş bırak
+    
     static unsigned long lastClear = 0;
-    if (now - lastClear > 2000) { // Sürekli clear yapıp titretmemek için
+    if (now - lastClear > 2000) { 
        lastClear = now;
        lcdOut.clear();
     }
   }
 }
 
-// ================= SETUP =================
+
 void setup() {
   Serial.begin(115200);
   Wire.begin(21, 22);
 
-  // --- İKİ EKRANI DA BAŞLAT ---
+  
   lcdIn.init();  lcdIn.backlight();
   lcdOut.init(); lcdOut.backlight();
   
@@ -341,7 +340,7 @@ void setup() {
   delay(1000);
 }
 
-// ================= LOOP =================
+
 void loop() {
   unsigned long now = millis();
 
@@ -350,22 +349,22 @@ void loop() {
 
   if (isOnline) app.loop();
 
-  // Veri Çekme
+  
   if (isOnline && (now - lastPollTime > 2000)) {
     lastPollTime = now;
     pollAllSlots();
   }
 
-  // LED Blink
+  
   if (now - ledBlinkTimer >= 500) {
     ledBlinkTimer = now;
     ledBlinkState = !ledBlinkState;
   }
 
-  // ---------------- SLOT KONTROLÜ ----------------
+  
   for (int i = 0; i < 6; i++) {
     long d;
-    if (i == 5) d = 5; // Slot 6 Hilesi (Korundu)
+    if (i == 5) d = 5; 
     else d = measureDistanceFiltered(ECHO_PINS[i]);
 
     bool instantState = slotOccupied[i];
@@ -380,13 +379,13 @@ void loop() {
         slotOccupied[i] = instantState;
         slotDebounceTime[i] = 0;
 
-        // -- ARAÇ GİRDİ --
+        
         if (!wasOccupied && slotOccupied[i]) {
           slotEnterTime[i] = getUnixTime();
           slotReserved[i] = false; 
           fb_updateSlotStatus(i, true, slotEnterTime[i]);
         } 
-        // -- ARAÇ ÇIKTI --
+        
         else if (wasOccupied && !slotOccupied[i]) {
           unsigned long exitTime = getUnixTime();
           unsigned long duration = exitTime - slotEnterTime[i];
@@ -394,7 +393,7 @@ void loop() {
           if (hours < 0.05) hours = 0.05;
           float fee = RATE_PER_HOUR[i] * hours;
           
-          // Çıkış yapan slotu işaretle -> Exit LCD'yi tetikler
+          
           pendingExitSlot = i;
           
           if (isOnline) fb_updateExitInfo(i, exitTime, fee);
@@ -404,21 +403,21 @@ void loop() {
       slotDebounceTime[i] = 0;
     }
 
-    // LED'ler
+    
     if (slotOccupied[i]) digitalWrite(LED_PINS[i], HIGH);
     else if (isOnline && slotReserved[i]) digitalWrite(LED_PINS[i], ledBlinkState ? HIGH : LOW);
     else digitalWrite(LED_PINS[i], LOW);
   }
 
-  // Boş yer hesabı
+  
   int freeCount = 0;
   for (int i = 0; i < 6; i++) if (!slotOccupied[i]) freeCount++;
 
-  // --- EKRANLARI GÜNCELLE ---
+  
   updateEntranceLCD(freeCount);
   updateExitLCD();
 
-  // ---------------- GİRİŞ KAPISI ----------------
+  
   if (isServoInOpen && (now - servoInTimer > GATE_OPEN_TIME)) {
     servoIn.write(IN_CLOSE_ANGLE); 
     isServoInOpen = false;
@@ -427,7 +426,7 @@ void loop() {
   long entryDist = measureDistanceFiltered(ECHO_PINS[6]); 
   if (!isServoInOpen && entryDist > CAR_DETECT_MIN_CM && entryDist < CAR_DETECT_MAX_CM) {
     if (freeCount > 0) {
-      // SADECE GİRİŞ EKRANINI DEĞİŞTİR
+      
       inWelcomeMode = true;
       inWelcomeTimer = now;
       lcdIn.clear();
@@ -442,34 +441,34 @@ void loop() {
     }
   }
 
-  // ---------------- ÇIKIŞ KAPISI VE ÖDEME ----------------
   
-  // Kapı Kapanma
+  
+  
   if (isServoOutOpen && (now - servoOutTimer > GATE_EXIT_TIME)) {
     servoOut.write(OUT_CLOSE_ANGLE); 
     isServoOutOpen = false;
     
-    // İşlem bitti, çıkış verilerini temizle
+    
     if (pendingExitSlot != -1) {
       fb_resetAfterExit(pendingExitSlot);
       slotPaid[pendingExitSlot] = false;
       pendingExitSlot = -1;
     }
-    lcdOut.clear(); // Ekranı temizle
+    lcdOut.clear(); 
   }
 
-  // Eğer ödeme yapıldıysa ve bekleyen araç varsa kapıyı aç
+  
   if (!isServoOutOpen && pendingExitSlot != -1) {
     
-    // Online ödeme kontrolü
+    
     bool isPaid = false;
     if (isOnline && slotPaid[pendingExitSlot] == true) isPaid = true;
-    else if (!isOnline) isPaid = true; // Offline modda test için otomatik geçir
+    else if (!isOnline) isPaid = true; 
     
     if (isPaid) {
       tone(BUZZER_PIN, 2000, 250);
       
-      // SADECE ÇIKIŞ EKRANINI DEĞİŞTİR
+      
       outGoodbyeMode = true;
       outGoodbyeTimer = now;
       lcdOut.clear();
